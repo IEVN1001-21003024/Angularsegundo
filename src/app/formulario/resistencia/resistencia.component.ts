@@ -7,8 +7,8 @@ interface ColorEntry {
   color2: string;
   color3: string;
   tolerancia: string;
-  valorMinimo: number | null;
-  valorMaximo: number | null;
+  valorMinimo?: number;
+  valorMaximo?: number;
 }
 
 @Component({
@@ -21,8 +21,8 @@ interface ColorEntry {
 export default class ResistenciaComponent {
   formGroup: FormGroup;
   colores: ColorEntry[] = [];
-  valorMinimo: number | null = null;
-  valorMaximo: number | null = null;
+  valorMinimo?: number;
+  valorMaximo?: number;
   mostrarTabla: boolean = false;
 
   readonly valoresColores: { [key: string]: number } = {
@@ -70,9 +70,7 @@ export default class ResistenciaComponent {
       const tolerancia = localStorage.getItem('tolerancia');
       const coloresSeleccionados: ColorEntry = {
         ...this.formGroup.value,
-        tolerancia: tolerancia || null,
-        valorMinimo: null,
-        valorMaximo: null
+        tolerancia: tolerancia || ''
       };
 
       this.colores.push(coloresSeleccionados);

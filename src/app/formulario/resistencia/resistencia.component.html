@@ -83,8 +83,8 @@
         <td class="border border-gray-500 p-2" [style.backgroundColor]="getColor(color.color2)">{{ color.color2 }}</td>
         <td class="border border-gray-500 p-2" [style.backgroundColor]="getColor(color.color3)">{{ color.color3 }}</td>
         <td class="border border-gray-500 p-2" [style.backgroundColor]="getColor(color.tolerancia)">{{ color.tolerancia }}</td>
-        <td class="border border-gray-500 p-2">{{ color.valorMinimo !== null ? color.valorMinimo.toFixed(2) : 'N/A' }}</td>
-        <td class="border border-gray-500 p-2">{{ color.valorMaximo !== null ? color.valorMaximo.toFixed(2) : 'N/A' }}</td>
+        <td class="border border-gray-500 p-2">{{ color.valorMinimo ? color.valorMinimo.toFixed(2) : 'N/A' }}</td>
+        <td class="border border-gray-500 p-2">{{ color.valorMaximo ? color.valorMaximo.toFixed(2) : 'N/A' }}</td>
       </tr>
     </tbody>
   </table>
