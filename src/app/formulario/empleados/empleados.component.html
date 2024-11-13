@@ -1,0 +1,101 @@
+<div class="flex space-x-8 bg-gray-900 text-white p-6">
+  <!-- Formulario para registrar/editar empleados -->
+  <form [formGroup]="formulario" (ngSubmit)="agregarOActualizarEmpleado()" class="w-1/2 space-y-4 bg-gray-800 shadow-md rounded-lg p-6">
+    <!-- Campo para matrícula -->
+    <div>
+      <label class="block text-sm font-medium text-gray-300">Matrícula</label>
+      <input
+        type="text"
+        formControlName="matricula"
+        class="mt-1 px-4 py-2 w-full border border-gray-700 bg-gray-900 text-white rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+        placeholder="Ingresa matrícula del empleado"
+      />
+    </div>
+
+    <!-- Campo para nombre -->
+    <div>
+      <label class="block text-sm font-medium text-gray-300">Nombre</label>
+      <input
+        type="text"
+        formControlName="nombre"
+        class="mt-1 px-4 py-2 w-full border border-gray-700 bg-gray-900 text-white rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+        placeholder="Ingresa nombre del empleado"
+      />
+    </div>
+
+    <!-- Campo para correo -->
+    <div>
+      <label class="block text-sm font-medium text-gray-300">Correo</label>
+      <input
+        type="email"
+        formControlName="correo"
+        class="mt-1 px-4 py-2 w-full border border-gray-700 bg-gray-900 text-white rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+        placeholder="Ingresa correo del empleado"
+      />
+    </div>
+
+    <!-- Campo para edad -->
+    <div>
+      <label class="block text-sm font-medium text-gray-300">Edad</label>
+      <input
+        type="number"
+        formControlName="edad"
+        class="mt-1 px-4 py-2 w-full border border-gray-700 bg-gray-900 text-white rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+        placeholder="Ingresa edad del empleado"
+      />
+    </div>
+
+    <!-- Campo para horas trabajadas -->
+    <div>
+      <label class="block text-sm font-medium text-gray-300">Horas Trabajadas</label>
+      <input
+        type="number"
+        formControlName="horas"
+        class="mt-1 px-4 py-2 w-full border border-gray-700 bg-gray-900 text-white rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+        placeholder="Ingresa horas trabajadas"
+      />
+    </div>
+
+    <!-- Botones para acciones -->
+    <div class="flex justify-between mt-4">
+      <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+        {{ modoEdicion ? 'Actualizar' : 'Agregar' }}
+      </button>
+      <button type="button" (click)="cargarEmpleadoParaEditar()" class="bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700">Modificar</button>
+      <button type="button" (click)="eliminarEmpleado()" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">Eliminar</button>
+    </div>
+  </form>
+
+  <!-- Sección de tabla de empleados -->
+  <div class="w-1/2">
+    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+      <table class="w-full text-sm text-left text-gray-400">
+        <thead class="text-xs text-gray-300 uppercase bg-gray-800">
+          <tr>
+            <th scope="col" class="px-6 py-3">Matrícula</th>
+            <th scope="col" class="px-6 py-3">Nombre</th>
+            <th scope="col" class="px-6 py-3">Correo</th>
+            <th scope="col" class="px-6 py-3">Edad</th>
+            <th scope="col" class="px-6 py-3">Horas Trabajadas</th>
+            <th scope="col" class="px-6 py-3">Horas Normales</th>
+            <th scope="col" class="px-6 py-3">Horas Adicionales</th>
+            <th scope="col" class="px-6 py-3">Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let empleado of listaEmpleados" class="bg-gray-900 border-b border-gray-700 hover:bg-gray-800">
+            <td class="px-6 py-4">{{ empleado.matricula }}</td>
+            <td class="px-6 py-4">{{ empleado.nombre }}</td>
+            <td class="px-6 py-4">{{ empleado.correo }}</td>
+            <td class="px-6 py-4">{{ empleado.edad }}</td>
+            <td class="px-6 py-4">{{ empleado.horas }}</td>
+            <td class="px-6 py-4">{{ calcularPagoHorasNormales(empleado.horas) }}</td>
+            <td class="px-6 py-4">{{ calcularPagoHorasAdicionales(empleado.horas) }}</td>
+            <td class="px-6 py-4">{{ calcularSubtotal(empleado.horas) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="mt-4 text-lg font-bold text-gray-300">Total pagos nómina: ${{ calcularTotalPagos() }}</div>
+  </div>
+</div>

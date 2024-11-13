@@ -1,155 +1,132 @@
-import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-
-interface ColorEntry {
-  color1: string;
-  color2: string;
-  color3: string;
-  tolerancia: string;
-  valorMinimo?: number;
-  valorMaximo?: number;
-}
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-resistencia',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './resistencia.component.html',
   styleUrls: ['./resistencia.component.css']
 })
-export default class ResistenciaComponent {
-  formGroup: FormGroup;
-  colores: ColorEntry[] = [];
-  valorMinimo?: number;
-  valorMaximo?: number;
-  mostrarTabla: boolean = false;
+export default class ResistenciaComponent implements OnInit {
 
-  readonly valoresColores: { [key: string]: number } = {
-    Negro: 0,
-    Café: 1,
-    Rojo: 2,
-    Naranja: 3,
-    Amarillo: 4,
-    Verde: 5,
-    Azul: 6,
-    Violeta: 7,
-    Gris: 8,
-    Blanco: 9,
-    'Oro 5%': 5,
-    'Plata 10%': 10
+  formulario!: FormGroup;
+  resultados: any[] = [];
+  tablaVisible: boolean = false; // Variable para controlar la visibilidad de la tabla
+  
+  colores: { [key: number]: string } = {
+    0: 'Negro',
+    1: 'Café',
+    2: 'Rojo',
+    3: 'Naranja',
+    4: 'Amarillo',
+    5: 'Verde',
+    6: 'Azul',
+    7: 'Violeta',
+    8: 'Gris',
+    9: 'Blanco'
+  };
+  
+  colores2: { [key: number]: string } = {
+    1: 'Negro',
+    10: 'Café',
+    100: 'Rojo',
+    1000: 'Naranja',
+    10000: 'Amarillo',
+    100000: 'Verde',
+    1000000: 'Azul',
+    10000000: 'Violeta',
+    100000000: 'Gris',
+    1000000000: 'Blanco'
   };
 
-  constructor(private formBuilder: FormBuilder) {
-    this.formGroup = this.formBuilder.group({
-      color1: ['', Validators.required],
-      color2: ['', Validators.required],
-      color3: ['', Validators.required]
+  constructor() {}
+
+  ngOnInit(): void {
+    this.formulario = new FormGroup({
+      color1: new FormControl('', Validators.required),
+      color2: new FormControl('', Validators.required),
+      color3: new FormControl('', Validators.required),
+      tolerancia: new FormControl('', Validators.required)
     });
 
-    this.loadColores();
+    // Cargar datos del localStorage al iniciar
+    this.cargarDesdeLocalStorage();
   }
 
-  loadColores() {
-    const storedColores = localStorage.getItem('colores');
-    if (storedColores) {
-      try {
-        this.colores = JSON.parse(storedColores) as ColorEntry[];
-        if (!Array.isArray(this.colores)) {
-          this.colores = [];
-        }
-      } catch (error) {
-        console.error('Error al parsear los colores desde el almacenamiento local:', error);
-        this.colores = [];
-      }
-    }
-  }
-
-  onSubmit() {
-    if (this.formGroup.valid) {
-      const tolerancia = localStorage.getItem('tolerancia');
-      const coloresSeleccionados: ColorEntry = {
-        ...this.formGroup.value,
-        tolerancia: tolerancia || ''
+  cargarDesdeLocalStorage() {
+    const datosGuardados = JSON.parse(localStorage.getItem('datosResistencia') || '[]');
+    this.resultados = datosGuardados.map((data: any) => {
+      return {
+        colo1: this.colores[data.color1],
+        colo2: this.colores[data.color2],
+        colo3: this.colores2[data.color3],
+        tolerancia: data.tolerancia,
+        valor: data.valor,
+        valormax: data.valormax,
+        valormin: data.valormin
       };
-
-      this.colores.push(coloresSeleccionados);
-      localStorage.setItem('colores', JSON.stringify(this.colores));
-
-      this.calcularResistencia(coloresSeleccionados);
-      this.mostrarTabla = true;
-
-      console.log('Colores guardados:', this.colores);
-      this.formGroup.reset();
-    }
+    });
   }
 
-  onToleranciaChange(tolerancia: string) {
-    if (['Oro 5%', 'Plata 10%'].includes(tolerancia)) {
-      localStorage.setItem('tolerancia', tolerancia);
-    }
-  }
-
-  getColor(color: string) {
-    const colorMap: { [key: string]: string } = {
-      'Oro 5%': '#FFD700',
-      'Plata 10%': '#C0C0C0',
-      Rojo: '#FF0000',
-      Amarillo: '#FFFF00',
-      Verde: '#00FF00',
-      Café: '#8B4513',
-      Naranja: '#FFA500',
-      Violeta: '#800080',
-      Negro: '#000000',
-      Azul: '#0000FF',
-      Gris: '#808080',
-      Blanco: '#FFFFFF'
+  calcular() {
+    const col1 = Number(this.formulario.get('color1')?.value); // Convertimos a número
+    const col2 = Number(this.formulario.get('color2')?.value); // Convertimos a número
+    const col3 = Number(this.formulario.get('color3')?.value); // Convertimos a número
+    const tol = Number(this.formulario.get('tolerancia')?.value); // Convertimos a número
+    
+    const valor = ((col1 * 10) + col2) * col3;
+    const tolerancia = tol;
+    const valormax = valor + (valor * tolerancia);
+    const valormin = valor - (valor * tolerancia);
+    
+    const resultado = {
+      colo1: this.colores[col1],
+      colo2: this.colores[col2],
+      colo3: this.colores2[col3],
+      tolerancia,
+      valor,
+      valormax,
+      valormin
     };
-    return colorMap[color] || '';
+
+    this.resultados.push(resultado);
+    this.guardarEnLocalStorage({ color1: col1, color2: col2, color3: col3, tolerancia: tol, valor, valormax, valormin });
+    this.tablaVisible = true; // Mostrar la tabla al calcular
   }
 
-  calcularResistencia(coloresSeleccionados: ColorEntry) {
-    const tolerancia = coloresSeleccionados.tolerancia;
-
-    if (this.colores.length > 0) {
-      const { color1, color2, color3 } = coloresSeleccionados;
-
-      const valorColor1 = this.valoresColores[color1];
-      const valorColor2 = this.valoresColores[color2];
-      const multiplicador = Math.pow(10, this.valoresColores[color3]);
-
-      if (valorColor1 !== undefined && valorColor2 !== undefined && multiplicador) {
-        const resistenciaTotal = (valorColor1 * 10 + valorColor2) * multiplicador;
-
-        if (tolerancia === 'Oro 5%') {
-          this.valorMinimo = resistenciaTotal * 0.95;
-          this.valorMaximo = resistenciaTotal * 1.05;
-        } else if (tolerancia === 'Plata 10%') {
-          this.valorMinimo = resistenciaTotal * 0.90;
-          this.valorMaximo = resistenciaTotal * 1.10;
-        }
-
-        this.colores[this.colores.length - 1].valorMinimo = this.valorMinimo;
-        this.colores[this.colores.length - 1].valorMaximo = this.valorMaximo;
-
-        localStorage.setItem('colores', JSON.stringify(this.colores));
-
-        console.log('Resistencia Total:', resistenciaTotal);
-        console.log('Valor Mínimo:', this.valorMinimo);
-        console.log('Valor Máximo:', this.valorMaximo);
-      }
-    }
+  mostrarTabla() {
+    this.tablaVisible = true; // Cambia la visibilidad de la tabla al presionar el botón "Mostrar"
   }
 
-  mostrarTablaDesdeLocalStorage() {
-    this.loadColores();
-    this.mostrarTabla = true;
+  guardarEnLocalStorage(formData: any) {
+    let datosGuardados = JSON.parse(localStorage.getItem('datosResistencia') || '[]');
+    datosGuardados.push(formData);
+    localStorage.setItem('datosResistencia', JSON.stringify(datosGuardados));
   }
 
-  eliminarRegistros() {
-    this.colores = [];
-    localStorage.removeItem('colores');
-    this.mostrarTabla = false;
-    console.log('Todos los registros han sido eliminados.');
+  vaciarLocalStorage() {
+    localStorage.removeItem('datosResistencia');
+    this.resultados = [];
+    this.tablaVisible = false; // Ocultar la tabla al eliminar
+  }
+
+  colorToClass(colorName: string) {
+    const colorClasses: { [key: string]: string } = {
+      'Negro': 'bg-black text-white',
+      'Café': 'bg-brown-600 text-white',
+      'Rojo': 'bg-red-600 text-white',
+      'Naranja': 'bg-orange-600 text-white',
+      'Amarillo': 'bg-yellow-500 text-white',
+      'Verde': 'bg-green-600 text-white',
+      'Azul': 'bg-blue-600 text-white',
+      'Violeta': 'bg-purple-600 text-white',
+      'Gris': 'bg-gray-400 text-black',
+      'Blanco': 'bg-white text-black'
+    };
+
+    return colorClasses[colorName] || '';
   }
 }

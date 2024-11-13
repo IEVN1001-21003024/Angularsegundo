@@ -8,6 +8,10 @@ export default[
     {
         path:'resistencia',
         loadComponent:()=>import('./resistencia/resistencia.component'),
+    },
+    {
+        path:'empleados',
+        loadComponent:()=>import('./empleados/empleados.component'),
     }
     
    
